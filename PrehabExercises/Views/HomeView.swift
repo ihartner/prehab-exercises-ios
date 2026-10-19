@@ -48,6 +48,11 @@ struct HomeView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Menu {
                         Button {
+                            path.append(AppRoute.breathing)
+                        } label: {
+                            Label("Breathing", systemImage: "figure.mind.and.body")
+                        }
+                        Button {
                             path.append(AppRoute.calendar)
                         } label: {
                             Label("Calendar", systemImage: "calendar")
@@ -73,6 +78,14 @@ struct HomeView: View {
                     CalendarView()
                 case .settings:
                     SettingsView()
+                case .breathing:
+                    BreathingListView { id in
+                        path.append(AppRoute.breathingSession(id: id))
+                    }
+                case .breathingSession(let id):
+                    BreathingSessionView(exerciseId: id) {
+                        path.removeLast()
+                    }
                 }
             }
         }

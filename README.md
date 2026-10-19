@@ -55,12 +55,17 @@ PrehabExercises/
   Reminder/
     ReminderSettings.swift         # enabled / daily-or-weekly / weekday / time
     ReminderManager.swift          # persists settings, schedules the repeating notification
+  Breathing/
+    BreathingExercise.swift        # the five techniques and their phase timings
+    BreathingSessionViewModel.swift # guided session: 50ms tick loop, voice cues, pause/mute
   Navigation/AppRoute.swift        # NavigationStack route enum
   Views/
     HomeView.swift                 # exercise list, weekly progress card, hamburger menu
     SessionView.swift              # timed session screen with circular countdown
     CalendarView.swift             # month calendar with prev/next navigation
     SettingsView.swift             # reminder settings (switch, daily/weekly, day, time)
+    BreathingListView.swift        # the five breathing techniques
+    BreathingSessionView.swift     # animated breathing circle with voice cues
   Theme/Theme.swift                # beige background + blue/gray accents, light & dark
   Assets.xcassets/                 # exercise illustrations (blue-tintable template images),
                                     # app icon, accent color
@@ -79,6 +84,10 @@ PrehabExercises/
   a weekday picker for weekly, and a time picker. On iOS this is a single repeating
   `UNCalendarNotificationTrigger` (the system repeats it, so there's no alarm re-arming
   like on Android). The notification permission prompt appears when you first enable it.
+- Same Breathing section (hamburger menu → Breathing): Box Breathing, 4-7-8, Belly Breathing,
+  Coherent Breathing (5-5), and the Physiological Sigh, each as an animated circle with spoken
+  phase cues, pause/resume, and a voice mute toggle. It's separate from the prehab plan and
+  doesn't count toward the weekly goal.
 - Voice guidance uses `AVSpeechSynthesizer` (the iOS equivalent of Android's
   `TextToSpeech`) instead of a specific named voice — it speaks in whatever voice/language is
   set as the device default, matching how the Android app defers to the system's TTS voice.
