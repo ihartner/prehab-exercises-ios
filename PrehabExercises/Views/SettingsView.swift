@@ -5,90 +5,35 @@ struct SettingsView: View {
     @EnvironmentObject private var reminders: ReminderManager
 
     var body: some View {
-        let settings = reminders.settings
-
         ScrollView {
             VStack(spacing: 16) {
-                SettingsCard {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Exercise reminders")
-                                .font(.title3.weight(.semibold))
-                                .foregroundStyle(AppColor.ink)
-                            Text("Get a notification reminding you to do your exercises.")
-                                .font(.footnote)
-                                .foregroundStyle(AppColor.inkMuted)
-                        }
-                        Spacer()
-                        Toggle("", isOn: enabledBinding)
-                            .labelsHidden()
-                            .tint(AppColor.primary)
-                    }
-                }
-
-                if settings.enabled {
+                if reminders.notificationsBlocked
+                    && (reminders.exerciseSettings.enabled || reminders.breathingSettings.enabled) {
                     SettingsCard {
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("Repeat")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(AppColor.ink)
-                            Picker("Repeat", selection: frequencyBinding) {
-                                ForEach(ReminderFrequency.allCases, id: \.self) { frequency in
-                                    Text(frequency.displayName).tag(frequency)
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Notifications are turned off for this app, so reminders won't appear.")
+                                .font(.subheadline)
+                                .foregroundStyle(AppColor.error)
+                            Button("Open notification settings") {
+                                if let url = URL(string: UIApplication.openSettingsURLString) {
+                                    UIApplication.shared.open(url)
                                 }
                             }
-                            .pickerStyle(.segmented)
-
-                            if settings.frequency == .weekly {
-                                Text("Day")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(AppColor.ink)
-                                weekdaySelector(selected: settings.weekday)
-                            }
-
-                            DatePicker(
-                                "Time",
-                                selection: timeBinding,
-                                displayedComponents: .hourAndMinute
-                            )
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(AppColor.ink)
-                            .tint(AppColor.primary)
-
-                            if let next = reminders.nextReminderDate {
-                                Text("Next reminder: \(next.formatted(date: .abbreviated, time: .shortened))")
-                                    .font(.footnote)
-                                    .foregroundStyle(AppColor.inkMuted)
-                            }
+                            .foregroundStyle(AppColor.primary)
                         }
                     }
-
-                    if reminders.notificationsBlocked {
-                        SettingsCard {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Notifications are turned off for this app, so reminders won't appear.")
-                                    .font(.subheadline)
-                                    .foregroundStyle(AppColor.error)
-                                Button("Open notification settings") {
-                                    if let url = URL(string: UIApplication.openSettingsURLString) {
-                                        UIApplication.shared.open(url)
-                                    }
-                                }
-                                .foregroundStyle(AppColor.primary)
-                            }
-                        }
-                    }
-
-                    Button {
-                        Task { await reminders.sendTestNotification() }
-                    } label: {
-                        Text("Send test notification")
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 6)
-                    }
-                    .buttonStyle(.bordered)
-                    .tint(AppColor.primary)
                 }
+
+                ReminderSection(
+                    type: .exercise,
+                    title: "Exercise reminders",
+                    description: "Get a notification reminding you to do your prehab exercises."
+                )
+                ReminderSection(
+                    type: .breathing,
+                    title: "Breathing reminders",
+                    description: "Get a notification reminding you to take a guided breathing break."
+                )
             }
             .padding(16)
         }
@@ -102,31 +47,103 @@ struct SettingsView: View {
             Task { await reminders.refreshAuthorization() }
         }
     }
+}
+
+/// A reminder's on/off switch and, when on, its daily/weekly, day, and time options.
+private struct ReminderSection: View {
+    @EnvironmentObject private var reminders: ReminderManager
+
+    let type: ReminderType
+    let title: String
+    let description: String
+
+    var body: some View {
+        let settings = reminders.settings(for: type)
+
+        SettingsCard {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(title)
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(AppColor.ink)
+                        Text(description)
+                            .font(.footnote)
+                            .foregroundStyle(AppColor.inkMuted)
+                    }
+                    Spacer()
+                    Toggle("", isOn: enabledBinding)
+                        .labelsHidden()
+                        .tint(AppColor.primary)
+                }
+
+                if settings.enabled {
+                    Text("Repeat")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(AppColor.ink)
+                    Picker("Repeat", selection: frequencyBinding) {
+                        ForEach(ReminderFrequency.allCases, id: \.self) { frequency in
+                            Text(frequency.displayName).tag(frequency)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+
+                    if settings.frequency == .weekly {
+                        Text("Day")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(AppColor.ink)
+                        weekdaySelector(selected: settings.weekday)
+                    }
+
+                    DatePicker(
+                        "Time",
+                        selection: timeBinding,
+                        displayedComponents: .hourAndMinute
+                    )
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AppColor.ink)
+                    .tint(AppColor.primary)
+
+                    if let next = reminders.nextReminderDate(for: type) {
+                        Text("Next reminder: \(next.formatted(date: .abbreviated, time: .shortened))")
+                            .font(.footnote)
+                            .foregroundStyle(AppColor.inkMuted)
+                    }
+
+                    Button("Send test notification") {
+                        Task { await reminders.sendTestNotification(for: type) }
+                    }
+                    .foregroundStyle(AppColor.primary)
+                }
+            }
+        }
+    }
 
     private var enabledBinding: Binding<Bool> {
         Binding(
-            get: { reminders.settings.enabled },
-            set: { value in reminders.update { $0.enabled = value } }
+            get: { reminders.settings(for: type).enabled },
+            set: { value in reminders.update(type) { $0.enabled = value } }
         )
     }
 
     private var frequencyBinding: Binding<ReminderFrequency> {
         Binding(
-            get: { reminders.settings.frequency },
-            set: { value in reminders.update { $0.frequency = value } }
+            get: { reminders.settings(for: type).frequency },
+            set: { value in reminders.update(type) { $0.frequency = value } }
         )
     }
 
     private var timeBinding: Binding<Date> {
         Binding(
             get: {
-                Calendar.current.date(
-                    from: DateComponents(hour: reminders.settings.hour, minute: reminders.settings.minute)
+                let current = reminders.settings(for: type)
+                return Calendar.current.date(
+                    from: DateComponents(hour: current.hour, minute: current.minute)
                 ) ?? Date()
             },
             set: { date in
                 let components = Calendar.current.dateComponents([.hour, .minute], from: date)
-                reminders.update {
+                reminders.update(type) {
                     $0.hour = components.hour ?? 9
                     $0.minute = components.minute ?? 0
                 }
@@ -139,7 +156,7 @@ struct SettingsView: View {
         return HStack {
             ForEach(1...7, id: \.self) { day in
                 Button {
-                    reminders.update { $0.weekday = day }
+                    reminders.update(type) { $0.weekday = day }
                 } label: {
                     Text(calendar.veryShortWeekdaySymbols[day - 1])
                         .font(.subheadline.weight(.semibold))

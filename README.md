@@ -54,7 +54,8 @@ PrehabExercises/
     MonthProgress.swift            # full month calendar grid
   Reminder/
     ReminderSettings.swift         # enabled / daily-or-weekly / weekday / time
-    ReminderManager.swift          # persists settings, schedules the repeating notification
+    ReminderType.swift             # exercise vs. breathing reminder (id, message, default schedule)
+    ReminderManager.swift          # persists settings, schedules a repeating notification per type
   Breathing/
     BreathingExercise.swift        # the five techniques and their phase timings
     BreathingSessionViewModel.swift # guided session: 50ms tick loop, voice cues, pause/mute
@@ -84,6 +85,9 @@ PrehabExercises/
   a weekday picker for weekly, and a time picker. On iOS this is a single repeating
   `UNCalendarNotificationTrigger` (the system repeats it, so there's no alarm re-arming
   like on Android). The notification permission prompt appears when you first enable it.
+  There's a second, independent **Breathing reminders** section with the same options (its own
+  schedule and notification, defaulting to 8:00 PM); tapping that notification opens the
+  Breathing section directly.
 - Same Breathing section (hamburger menu → Breathing): Box Breathing, 4-7-8, Belly Breathing,
   Coherent Breathing (5-5), and the Physiological Sigh, each as an animated circle with spoken
   phase cues, pause/resume, and a voice mute toggle. It's separate from the prehab plan and

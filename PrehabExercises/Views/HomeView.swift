@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject private var progressStore: ProgressStore
+    @EnvironmentObject private var reminders: ReminderManager
     @State private var path = NavigationPath()
 
     private let exercises = ExerciseRepository.all
@@ -88,6 +89,16 @@ struct HomeView: View {
                     }
                 }
             }
+        }
+        // A tapped breathing reminder asks to open its screen. Checking on appear covers a cold
+        // launch from the notification; onChange covers taps while the app is already running.
+        .onAppear { openPendingReminderDestination() }
+        .onChange(of: reminders.pendingDestination) { _, _ in openPendingReminderDestination() }
+    }
+
+    private func openPendingReminderDestination() {
+        if let route = reminders.consumePendingDestination() {
+            path.append(route)
         }
     }
 }
