@@ -41,7 +41,7 @@ struct HomeView: View {
                 .padding(16)
             }
             .background(AppColor.background)
-            .navigationTitle("Prehab Exercises")
+            .navigationTitle("Work")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(AppColor.primaryContainer, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)

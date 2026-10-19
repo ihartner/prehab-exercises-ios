@@ -1,5 +1,8 @@
 # Prehab Exercises (iOS)
 
+> The app's display name is **Work** (the home-screen label and the Home title). The repo,
+> bundle id (`com.prehab.exercises`), and project names are unchanged.
+
 SwiftUI port of the [Android Prehab Exercises app](https://github.com/ihartner/prehab-exercises) —
 a voice-guided, timed pre-surgery exercise plan that progresses lying → sitting → standing,
 with weekly and calendar progress tracking.
