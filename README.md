@@ -52,11 +52,15 @@ PrehabExercises/
     ProgressStore.swift            # UserDefaults-backed completed-dates store
     WeekProgress.swift             # Sun-Sat weekly view + streak
     MonthProgress.swift            # full month calendar grid
+  Reminder/
+    ReminderSettings.swift         # enabled / daily-or-weekly / weekday / time
+    ReminderManager.swift          # persists settings, schedules the repeating notification
   Navigation/AppRoute.swift        # NavigationStack route enum
   Views/
     HomeView.swift                 # exercise list, weekly progress card, hamburger menu
     SessionView.swift              # timed session screen with circular countdown
     CalendarView.swift             # month calendar with prev/next navigation
+    SettingsView.swift             # reminder settings (switch, daily/weekly, day, time)
   Theme/Theme.swift                # beige background + blue/gray accents, light & dark
   Assets.xcassets/                 # exercise illustrations (blue-tintable template images),
                                     # app icon, accent color
@@ -71,6 +75,10 @@ PrehabExercises/
 - Same progress model: a "This week" card resets naturally every Sunday (it always computes
   from the current Sun-Sat range), full history is preserved and browsable via a hamburger
   menu → Calendar screen.
+- Same reminders: hamburger menu → Settings → Exercise reminders, with a daily/weekly choice,
+  a weekday picker for weekly, and a time picker. On iOS this is a single repeating
+  `UNCalendarNotificationTrigger` (the system repeats it, so there's no alarm re-arming
+  like on Android). The notification permission prompt appears when you first enable it.
 - Voice guidance uses `AVSpeechSynthesizer` (the iOS equivalent of Android's
   `TextToSpeech`) instead of a specific named voice — it speaks in whatever voice/language is
   set as the device default, matching how the Android app defers to the system's TTS voice.

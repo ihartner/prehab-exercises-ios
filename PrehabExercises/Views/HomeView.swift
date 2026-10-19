@@ -52,6 +52,11 @@ struct HomeView: View {
                         } label: {
                             Label("Calendar", systemImage: "calendar")
                         }
+                        Button {
+                            path.append(AppRoute.settings)
+                        } label: {
+                            Label("Settings", systemImage: "gearshape")
+                        }
                     } label: {
                         Image(systemName: "line.3.horizontal")
                             .foregroundStyle(AppColor.onPrimaryContainer)
@@ -66,6 +71,8 @@ struct HomeView: View {
                     }
                 case .calendar:
                     CalendarView()
+                case .settings:
+                    SettingsView()
                 }
             }
         }
